@@ -1,0 +1,4 @@
+As a senior software developer, your task is to review and fix any issues found in the scripts given to you before submitting to github. Read through all the scripts, identify any errors (if any) then propose the refactored code solution. Run the scripts and verify the results before confirming that all the errors are fixed.  
+Write down all your findings and solutions in a readable markdown file for review.  
+Provide the updated scripts for me to review, the scripts should retain the current filenames.
+has context menu
