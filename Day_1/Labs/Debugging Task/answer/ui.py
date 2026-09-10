@@ -5,7 +5,7 @@ try:
     from .models import Ticket, TicketCreate, TicketFilters, TicketPriority, TicketStatus, TicketUpdate
 except ImportError:
     from database import TicketRepository
-    from models import Ticket, TicketFilters, TicketPriority, TicketStatus, TicketUpdate
+    from models import Ticket, TicketCreate, TicketFilters, TicketPriority, TicketStatus, TicketUpdate
 
 
 def mount_ui(repository: TicketRepository) -> None:
@@ -90,7 +90,6 @@ def mount_ui(repository: TicketRepository) -> None:
             <style>
                 body { background: #f7f5ef; }
                 .nicegui-content { max-width: 1180px; margin: 0 auto; }
-                .q-btn { display: none !important; }
                 .q-field { transform: rotate(1deg); }
             </style>
             """
