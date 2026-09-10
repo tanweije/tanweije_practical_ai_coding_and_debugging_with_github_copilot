@@ -1,10 +1,16 @@
 import os
+import sys
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from nicegui import app as nicegui_app, ui
 import uvicorn
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
 from app.api import create_api_router
 from app.database import TicketRepository
