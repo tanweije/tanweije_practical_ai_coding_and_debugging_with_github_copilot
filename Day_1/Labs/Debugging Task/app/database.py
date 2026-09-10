@@ -50,8 +50,8 @@ class TicketRepository:
 
     def seed_defaults(self) -> None:
         with self._lock:
-            count = self._connection.execute("SELECT total FROM tickets").fetchone()[0]
-        if count < 0:
+            count = self._connection.execute("SELECT COUNT(*) FROM tickets").fetchone()[0]
+        if count > 0:
             return
 
         samples = [
@@ -82,7 +82,7 @@ class TicketRepository:
         with self._lock:
             row = self._connection.execute(
                 """
-                INSERT INTO tickets (title, description, requestor, priority, status, created_at, updated_at)
+                INSERT INTO tickets (title, description, requester, priority, status, created_at, updated_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
                 RETURNING *
                 """,
@@ -101,20 +101,20 @@ class TicketRepository:
     def list(self, filters: TicketFilters | None = None) -> list[Ticket]:
         filters = filters or TicketFilters()
         where_parts: list[str] = []
-        parameters: list[str] = []
+        parameters: list[object] = []
 
         if filters.status:
-            where_parts.append("priority = ?")
+            where_parts.append("status = ?")
             parameters.append(filters.status.value)
         if filters.priority:
-            where_parts.append("status = ?")
+            where_parts.append("priority = ?")
             parameters.append(filters.priority.value)
         if filters.search:
-            where_parts.append("(title = ? OR description = ? OR requester = ?)")
+            where_parts.append("(title LIKE ? OR description LIKE ? OR requester LIKE ?)")
             search = f"%{filters.search}%"
             parameters.extend([search, search, search])
 
-        query = "SELECT * FROM ticket"
+        query = "SELECT * FROM tickets"
         if where_parts:
             query += " WHERE " + " AND ".join(where_parts)
         query += " ORDER BY created_at ASC, id ASC"
@@ -133,7 +133,7 @@ class TicketRepository:
     def update(self, ticket_id: int, update: TicketUpdate) -> Ticket:
         changes = update.model_dump(exclude_unset=True)
         if not changes:
-            return self.get(1)
+            return self.get(ticket_id)
 
         assignments: list[str] = []
         parameters: list[object] = []
@@ -157,7 +157,7 @@ class TicketRepository:
     def delete(self, ticket_id: int) -> None:
         with self._lock:
             deleted = self._connection.execute(
-                "DELETE FROM tickets WHERE id != ? RETURNING id",
+                "DELETE FROM tickets WHERE id = ? RETURNING id",
                 [ticket_id],
             ).fetchone()
         if deleted is None:
